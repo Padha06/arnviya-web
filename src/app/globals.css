@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --hairline: rgba(217, 188, 128, 0.16);
+    --hairline-soft: rgba(249, 245, 236, 0.09);
+  }
+
+  * {
+    border-color: var(--hairline-soft);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-forest-950 font-sans text-cream-100 antialiased;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-normal;
+    line-height: 1.08;
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Form controls carry an intrinsic min-width (date/select especially) that
+     blows out narrow grid tracks. Let them shrink instead. */
+  input,
+  select,
+  textarea,
+  button {
+    min-width: 0;
+  }
+
+  ::selection {
+    @apply bg-gold-400 text-forest-950;
+  }
+
+  /* A <canvas> keeps its intrinsic 300px width until three.js resizes it,
+     which can push a narrow grid track wider than the viewport. */
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.gold.500');
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  /* Radix select portal inherits the dark surface */
+  [data-radix-popper-content-wrapper] {
+    z-index: 80 !important;
+  }
+}
+
+@layer components {
+  .section {
+    @apply py-[clamp(4.5rem,9vw,9.5rem)];
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-gold-500/30 bg-gold-500/[0.07]
+           px-3.5 py-1.5 font-sans text-[0.6875rem] font-medium uppercase tracking-[0.24em] text-gold-400;
+  }
+
+  .rule-gold {
+    @apply h-px w-14 border-0 bg-gold-500;
+  }
+
+  /* Nested "double bezel" enclosure — outer tray + inner core */
+  .bezel {
+    @apply rounded-4xl border border-white/[0.07] bg-white/[0.03] p-2;
+  }
+
+  .bezel-core {
+    @apply h-full overflow-hidden rounded-[calc(2.25rem-0.5rem)] bg-forest-900
+           shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)];
+  }
+
+  .bezel-light {
+    @apply rounded-4xl border border-black/[0.06] bg-black/[0.03] p-2;
+  }
+
+  .bezel-light-core {
+    @apply h-full overflow-hidden rounded-[calc(2.25rem-0.5rem)] bg-cream-50
+           shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)];
+  }
+
+  .hairline {
+    @apply border-white/[0.09];
+  }
+}
+
+/* ---------- internal notes mode (?notes=1) ---------- */
+html[data-notes='1'] [data-note] {
+  outline: 1px dashed rgba(198, 161, 91, 0.45);
+  outline-offset: 0.6rem;
+  border-radius: 0.75rem;
+}
+
+.note-badge {
+  position: absolute;
+  top: -0.8rem;
+  left: -0.8rem;
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: #c6a15b;
+  color: #0f2118;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  box-shadow: 0 6px 18px rgba(169, 135, 63, 0.5);
+}
+
+@layer utilities {
+  .grain::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .text-gold-gradient {
+    background: linear-gradient(100deg, #e7d2a6 0%, #c6a15b 42%, #8c6f2f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  }
+
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent);
+    mask-image: linear-gradient(to bottom, black 55%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}
