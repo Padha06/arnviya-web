@@ -11,13 +11,15 @@ import { useQuote } from './quote-context';
 function Stepper({ id, name }: { id: string; name: string }) {
   const { quantities, setQty } = useQuote();
   const qty = quantities[id] ?? 0;
+  const product = QUOTE_PRODUCTS.find((p) => p.id === id);
+  const moq = product?.moq ?? 25;
 
   return (
     <div className="flex items-center overflow-hidden rounded-full border border-white/10 bg-forest-900/70">
       <button
         type="button"
         aria-label={`Decrease ${name}`}
-        onClick={() => setQty(id, qty - 5)}
+        onClick={() => setQty(id, qty <= moq ? 0 : qty - 5)}
         className="grid h-9 w-9 place-items-center text-gold-400 transition-colors duration-300 hover:bg-white/[0.07]"
       >
         <Minus className="h-3.5 w-3.5" />
@@ -25,22 +27,26 @@ function Stepper({ id, name }: { id: string; name: string }) {
       <input
         type="number"
         inputMode="numeric"
-        min={0}
+        min={qty > 0 ? moq : 0}
         max={5000}
         step={5}
         value={qty}
         aria-label={`Quantity for ${name}`}
+        aria-describedby={`${id}-moq-hint`}
         onChange={(e) => setQty(id, parseInt(e.target.value || '0', 10))}
         className="h-9 w-14 border-0 bg-transparent text-center text-sm tabular-nums text-cream-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
       <button
         type="button"
         aria-label={`Increase ${name}`}
-        onClick={() => setQty(id, qty + 5)}
+        onClick={() => setQty(id, qty === 0 ? moq : qty + 5)}
         className="grid h-9 w-9 place-items-center text-gold-400 transition-colors duration-300 hover:bg-white/[0.07]"
       >
         <Plus className="h-3.5 w-3.5" />
       </button>
+      <span id={`${id}-moq-hint`} className="sr-only">
+        Minimum order {moq} pieces
+      </span>
     </div>
   );
 }
@@ -79,14 +85,15 @@ export function QuoteBuilder() {
         </h2>
         <p className="mt-5 max-w-[54ch] text-cream-100/60">
           Add products and set quantities — the per-piece rate falls automatically at 50, 100, 250
-          and 500 pieces. Send the finished brief and you&rsquo;ll have a formal quotation and a
-          digital mock-up within 24 hours.
+          and 500 pieces. Minimums start at 5 pieces for kits and 25 for singles. Send the
+          finished brief and you&rsquo;ll have a formal quotation and a digital mock-up within 24
+          hours.
         </p>
       </BlurFade>
 
       <BlurFade inView delay={0.06}>
         <div className="mt-10 flex flex-wrap items-center gap-2.5">
-          <span className="text-[0.6875rem] uppercase tracking-[0.2em] text-cream-100/45">
+          <span className="text-[0.6875rem] uppercase tracking-[0.2em] text-cream-100/50">
             Quick start
           </span>
           {PRESETS.map((p) => (
@@ -102,7 +109,7 @@ export function QuoteBuilder() {
           <button
             type="button"
             onClick={reset}
-            className="rounded-full px-3 py-2 text-[0.6875rem] uppercase tracking-[0.13em] text-cream-100/40 transition-colors duration-300 hover:text-cream-100/80"
+            className="rounded-full px-3 py-2 text-[0.6875rem] uppercase tracking-[0.13em] text-cream-100/50 transition-colors duration-300 hover:text-cream-100/80"
           >
             Clear
           </button>
@@ -137,7 +144,7 @@ export function QuoteBuilder() {
                     <div className="font-display text-lg leading-tight text-cream-100">
                       {p.name}
                     </div>
-                    <div className="mt-1 text-xs text-cream-100/45">{p.sub}</div>
+                    <div className="mt-1 text-xs text-cream-100/50">{p.sub}</div>
                   </div>
                   <div className="col-span-2 flex items-center justify-between gap-4 sm:col-span-1 sm:justify-end">
                     <Stepper id={p.id} name={p.name} />
@@ -171,7 +178,7 @@ export function QuoteBuilder() {
                     />
                     <span className="text-sm text-cream-100/85">
                       {a.label}
-                      <span className="mt-0.5 block text-xs text-cream-100/45">
+                      <span className="mt-0.5 block text-xs text-cream-100/50">
                         +{inr(a.rate)} per piece — {a.hint}
                       </span>
                     </span>
@@ -187,7 +194,7 @@ export function QuoteBuilder() {
                   />
                   <span className="text-sm text-cream-100/85">
                     Express production
-                    <span className="mt-0.5 block text-xs text-cream-100/45">
+                    <span className="mt-0.5 block text-xs text-cream-100/50">
                       +15% — priority slot, from 7 working days
                     </span>
                   </span>
@@ -202,7 +209,7 @@ export function QuoteBuilder() {
                   />
                   <span className="text-sm text-cream-100/85">
                     Show GST @ 18%
-                    <span className="mt-0.5 block text-xs text-cream-100/45">
+                    <span className="mt-0.5 block text-xs text-cream-100/50">
                       Rates exclude GST until this is on
                     </span>
                   </span>
@@ -215,10 +222,11 @@ export function QuoteBuilder() {
             <div className="bezel-core p-6">
               <h3 className="font-display text-xl text-cream-100">How the pricing works</h3>
               <p className="mt-2 text-sm leading-relaxed text-cream-100/55">
-                Rates fall automatically as quantity crosses 50, 100, 250 and 500 pieces. Below 25
-                pieces the 25-piece rate applies — that is our minimum for a corporate run. Above
-                500 pieces, and for bespoke wall art, we quote individually because the material
-                cost changes with size.
+                Rates fall automatically as quantity crosses 50, 100, 250 and 500 pieces. Every
+                product has its own minimum — 25 pieces for singles, 5–10 for kits — and below the
+                first tier you pay that product&rsquo;s 25-piece rate. Above 500 pieces, and for
+                bespoke wall art, we quote individually because the material cost changes with
+                size.
               </p>
             </div>
           </div>
@@ -228,14 +236,14 @@ export function QuoteBuilder() {
         <div className="lg:sticky lg:top-28">
           <div className="relative">
             <div className="bezel">
-              <div className="bezel-core p-5 sm:p-6">
+              <div className="bezel-core p-5 sm:p-6" role="status" aria-live="polite">
                 <p className="text-[0.6875rem] uppercase tracking-[0.2em] text-gold-400">
                   Your estimate
                 </p>
 
                 <div className="mt-5 space-y-3">
                   {lines.length === 0 ? (
-                    <p className="text-sm text-cream-100/45">
+                    <p className="text-sm text-cream-100/50">
                       Add a quantity to any product to build the quote. Prices fall automatically at
                       50, 100, 250 and 500 pieces.
                     </p>
@@ -244,11 +252,11 @@ export function QuoteBuilder() {
                       <div key={l.id}>
                         <div className="flex items-baseline justify-between gap-4 text-sm text-cream-100/85">
                           <span>
-                            {l.name} <span className="text-cream-100/40">× {l.qty}</span>
+                            {l.name} <span className="text-cream-100/50">× {l.qty}</span>
                           </span>
                           <span className="tabular-nums">{inr(l.line)}</span>
                         </div>
-                        <div className="mt-0.5 text-xs text-cream-100/40 tabular-nums">
+                        <div className="mt-0.5 text-xs text-cream-100/50 tabular-nums">
                           {inr(l.unit)} per piece
                         </div>
                       </div>
@@ -260,7 +268,7 @@ export function QuoteBuilder() {
                   <div className="mt-6 space-y-2.5 border-t border-white/[0.09] pt-5 text-sm">
                     <div className="flex justify-between text-cream-100/70">
                       <span>
-                        Subtotal <span className="text-cream-100/40">({totalQty} pieces)</span>
+                        Subtotal <span className="text-cream-100/50">({totalQty} pieces)</span>
                       </span>
                       <span className="tabular-nums text-cream-100/90">{inr(subtotal)}</span>
                     </div>
@@ -276,7 +284,7 @@ export function QuoteBuilder() {
                     </div>
                     {saving > 0 ? (
                       <div className="flex justify-between text-sm text-sage">
-                        <span>Volume saving vs 25-pc rate</span>
+                        <span>Volume saving vs first-tier rate</span>
                         <span className="tabular-nums">{inr(saving)}</span>
                       </div>
                     ) : null}
@@ -306,7 +314,7 @@ export function QuoteBuilder() {
                   </Button>
                 </div>
 
-                <p className="mt-4 text-xs leading-relaxed text-cream-100/40">
+                <p className="mt-4 text-xs leading-relaxed text-cream-100/50">
                   Indicative only. Final pricing confirmed once botanicals, hardware and packaging
                   are chosen.
                 </p>

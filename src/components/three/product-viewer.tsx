@@ -17,6 +17,7 @@ const ResinScene = dynamic(() => import('./resin-scene'), {
 export function ProductViewer({ className }: { className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [mount, setMount] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -46,22 +47,24 @@ export function ProductViewer({ className }: { className?: string }) {
         className,
       )}
     >
-      {/* Poster: shown until the scene is mounted, and as the no-WebGL fallback */}
+      {/* Poster: holds until the GLB has actually loaded (it is ~2 MB), and
+          doubles as the no-WebGL fallback — if the canvas never reports ready,
+          the photo simply stays. */}
       <Image
         src="/images/clock-hex-floral.jpg"
-        alt="Handcrafted hexagonal resin clock with pressed botanicals"
+        alt="Handcrafted resin clock with pressed botanicals and gold Roman numerals"
         fill
         sizes="(max-width: 768px) 100vw, 560px"
         className={cn(
           'object-cover transition-opacity duration-700',
-          mount ? 'opacity-0' : 'opacity-100',
+          ready ? 'opacity-0' : 'opacity-100',
         )}
         priority={false}
       />
 
       {mount ? (
         <div className="absolute inset-0 overflow-hidden">
-          <ResinScene />
+          <ResinScene onReady={() => setReady(true)} />
         </div>
       ) : null}
 
@@ -73,7 +76,7 @@ export function ProductViewer({ className }: { className?: string }) {
 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_40%,transparent_0%,rgba(10,23,15,0.55)_100%)]" />
 
-      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 font-sans text-[0.625rem] uppercase tracking-[0.2em] text-cream-100/45">
+      <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 font-sans text-[0.625rem] uppercase tracking-[0.2em] text-cream-100/50">
         Drag to rotate
       </div>
     </div>

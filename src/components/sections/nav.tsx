@@ -59,8 +59,10 @@ export function Nav() {
           </span>
         </a>
 
-        <nav aria-label="Primary" className="ml-auto hidden lg:block">
-          <ul className="flex items-center">
+        <nav aria-label="Primary" className="ml-auto min-w-0 hidden lg:block">
+          {/* flex-wrap: at large text sizes the row can't hold every link on
+              one line — they stack inside the pill instead of overflowing it */}
+          <ul className="flex flex-wrap items-center justify-end">
             {LINKS.map((l) => (
               <li key={l.href}>
                 <a

@@ -33,7 +33,7 @@ export function Footer() {
                 Arnviya
               </span>
             </div>
-            <p className="mt-5 max-w-[32ch] text-sm leading-relaxed text-cream-100/50">
+            <p className="mt-5 max-w-[32ch] text-sm leading-relaxed text-cream-100/55">
               Born from the heart of the forest. Handcrafted resin gifts with real botanicals, made
               in Vadodara, delivered across India.
             </p>
@@ -72,21 +72,12 @@ export function Footer() {
                   hello@arnviya.com
                 </a>
               </li>
-              <li>
-                <a
-                  href="https://wa.me/910000000000"
-                  className="transition-colors duration-300 hover:text-cream-100"
-                >
-                  WhatsApp · +91 00000 00000
-                </a>
-              </li>
               <li>Vadodara, Gujarat, India</li>
-              <li className="text-cream-100/40">GSTIN · 24XXXXXXXXXXXZX</li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-white/[0.08] pt-6 text-xs text-cream-100/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-3 border-t border-white/[0.08] pt-6 text-xs text-cream-100/55 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Arnviya. Handcrafted with love and nature.</span>
           <span>Nature never goes out of style — and neither will your gift.</span>
         </div>

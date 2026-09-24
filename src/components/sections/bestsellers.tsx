@@ -56,13 +56,13 @@ export function Bestsellers() {
                       <div className="font-display text-2xl leading-none text-gold-400">
                         {inr(p.priceAt100)}
                       </div>
-                      <div className="mt-1.5 text-[0.625rem] uppercase tracking-[0.16em] text-cream-100/40">
+                      <div className="mt-1.5 text-[0.625rem] uppercase tracking-[0.16em] text-cream-100/50">
                         per piece at 100 · MOQ {p.moq}
                       </div>
                     </div>
                     <a
                       href="#quote"
-                      className="shrink-0 border-b border-gold-500/40 pb-0.5 text-[0.6875rem] uppercase tracking-[0.16em] text-gold-400 transition-colors duration-300 hover:text-gold-300"
+                      className="relative shrink-0 border-b border-gold-500/40 pb-0.5 text-[0.6875rem] uppercase tracking-[0.16em] text-gold-400 transition-colors duration-300 hover:text-gold-300 before:absolute before:-inset-x-3 before:-inset-y-4 before:content-['']"
                     >
                       Add to quote
                     </a>

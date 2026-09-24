@@ -12,7 +12,11 @@ type TextShimmerProps = {
 export function TextShimmer({ children, className }: TextShimmerProps) {
   return (
     <span
-      className={cn('inline-block animate-shimmer bg-clip-text text-transparent', className)}
+      className={cn(
+        'inline-block animate-shimmer bg-clip-text text-transparent',
+        /* reduced motion: animation none (globals) leaves the static gold gradient */
+        className,
+      )}
       style={
         {
           backgroundImage:

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useInView, type Variants } from 'framer-motion';
+import { motion, useInView, useReducedMotion, type Variants } from 'framer-motion';
 import { useRef } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -30,10 +30,12 @@ export function BlurFade({
   const ref = useRef<HTMLDivElement>(null);
   const inViewResult = useInView(ref, { once: true, margin: inViewMargin as never });
   const isInView = !inView || inViewResult;
+  const reduce = useReducedMotion();
+  const flatY = reduce ? 0 : yOffset;
 
   const defaultVariants: Variants = {
-    hidden: { y: yOffset, opacity: 0, filter: `blur(${blur})` },
-    visible: { y: -yOffset, opacity: 1, filter: 'blur(0px)' },
+    hidden: { y: flatY, opacity: 0, filter: reduce ? 'none' : `blur(${blur})` },
+    visible: { y: reduce ? 0 : -yOffset, opacity: 1, filter: 'none' },
   };
 
   const combinedVariants = variant ?? defaultVariants;
@@ -45,7 +47,11 @@ export function BlurFade({
       animate={isInView ? 'visible' : 'hidden'}
       exit="hidden"
       variants={combinedVariants}
-      transition={{ delay: 0.04 + delay, duration, ease: [0.22, 1, 0.36, 1] }}
+      transition={
+        reduce
+          ? { duration: 0.2, ease: 'easeOut' }
+          : { delay: 0.04 + delay, duration, ease: [0.22, 1, 0.36, 1] }
+      }
       className={cn(className)}
     >
       {children}

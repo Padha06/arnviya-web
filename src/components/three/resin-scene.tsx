@@ -1,10 +1,21 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useRef } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { Float, OrbitControls } from '@react-three/drei';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import type { Group } from 'three';
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(mq.matches);
+    const on = () => setReduced(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return reduced;
+}
 
 /**
  * A soft studio gradient, baked into a PMREM environment map.
@@ -44,8 +55,13 @@ function GradientEnvironment() {
     pmrem.compileEquirectangularShader();
     const envMap = pmrem.fromEquirectangular(canvasTexture).texture;
     scene.environment = envMap;
+    // Studio-light backdrop: the poster photo the scene crossfades from sits on
+    // a light sweep, and the GLB's resin is alpha-blended — against the dark
+    // section it would read muddy. This keeps the card continuous.
+    scene.background = new THREE.Color('#e7e4dc');
     return () => {
       scene.environment = null;
+      scene.background = null;
       envMap.dispose();
       pmrem.dispose();
       canvasTexture.dispose();
@@ -55,80 +71,77 @@ function GradientEnvironment() {
   return null;
 }
 
-/** A hexagonal resin block with botanicals and gold foil suspended inside. */
-function ResinBlock() {
-  const group = useRef<Group>(null);
+/**
+ * The authored resin clock (Clock_resin.glb): normalized to the stage the
+ * old procedural block occupied, and played on its baked 4s rocking loop.
+ */
+function ClockModel({ onReady }: { onReady?: () => void }) {
+  const { scene, animations } = useGLTF('/models/clock-resin.glb');
+  const mixer = useRef<THREE.AnimationMixer | null>(null);
+  const ready = useRef(false);
+  const reduce = usePrefersReducedMotion();
 
-  const botanicals = useMemo(
-    () => [
-      { pos: [-0.34, 0.26, 0.02], color: '#7f9c6a', scale: 0.19 },
-      { pos: [0.3, -0.2, -0.04], color: '#c48f8a', scale: 0.16 },
-      { pos: [0.05, 0.36, 0.06], color: '#b9c9a8', scale: 0.12 },
-      { pos: [-0.16, -0.34, 0.04], color: '#a8b892', scale: 0.14 },
-      { pos: [0.4, 0.24, 0.02], color: '#8fae7a', scale: 0.1 },
-    ],
-    [],
-  );
+  // The Blender export is ~0.32 units across — center it and scale it up to
+  // the ~2-unit stage the camera and framing were composed around.
+  const fit = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const scale = 2.0 / maxDim;
+    return {
+      position: [
+        -center.x * scale,
+        -center.y * scale,
+        -center.z * scale,
+      ] as [number, number, number],
+      scale,
+    };
+  }, [scene]);
 
-  const flakes = useMemo(
-    () =>
-      Array.from({ length: 14 }, (_, i) => {
-        const a = (i / 14) * Math.PI * 2;
-        const r = 0.28 + ((i * 37) % 50) / 100;
-        return [Math.cos(a) * r, Math.sin(a) * r * 0.9, ((i * 13) % 20) / 100 - 0.1];
-      }),
-    [],
-  );
+  useEffect(() => {
+    if (animations.length) {
+      const m = new THREE.AnimationMixer(scene);
+      for (const clip of animations) {
+        const action = m.clipAction(clip);
+        if (reduce) {
+          /* Rest on the first frame; drag-to-rotate still works. */
+          action.setLoop(THREE.LoopOnce, 1);
+          action.clampWhenFinished = true;
+          action.play();
+          action.paused = true;
+          action.time = 0;
+        } else {
+          action.setLoop(THREE.LoopRepeat, Infinity);
+          action.play();
+        }
+      }
+      mixer.current = m;
+    }
+    if (!ready.current) {
+      ready.current = true;
+      onReady?.();
+    }
+    return () => {
+      mixer.current?.stopAllAction();
+      mixer.current?.uncacheRoot(scene);
+      mixer.current = null;
+    };
+  }, [scene, animations, onReady, reduce]);
+
+  useFrame((_, delta) => {
+    // clamp so a backgrounded tab doesn't jump the loop on return
+    mixer.current?.update(Math.min(delta, 0.1));
+  });
 
   return (
-    <group ref={group}>
-      <Float speed={1.1} rotationIntensity={0.25} floatIntensity={0.5}>
-        {/* resin body — translucent gloss rather than `transmission`, so it
-            renders identically on real GPUs and software rasterisers alike */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.98, 0.98, 0.42, 6]} />
-          <meshPhysicalMaterial
-            transparent
-            opacity={0.34}
-            depthWrite={false}
-            roughness={0.05}
-            metalness={0}
-            ior={1.45}
-            clearcoat={1}
-            clearcoatRoughness={0.04}
-            color="#e2f0e4"
-            envMapIntensity={1.8}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-
-        {/* botanicals preserved inside */}
-        {botanicals.map((b, i) => (
-          <mesh key={i} position={b.pos as [number, number, number]} scale={b.scale}>
-            <icosahedronGeometry args={[1, 0]} />
-            <meshStandardMaterial color={b.color} roughness={0.62} metalness={0.02} />
-          </mesh>
-        ))}
-
-        {/* gold foil flakes */}
-        {flakes.map((f, i) => (
-          <mesh key={i} position={f as [number, number, number]} scale={0.026}>
-            <octahedronGeometry args={[1, 0]} />
-            <meshStandardMaterial color="#d9bc80" roughness={0.25} metalness={1} />
-          </mesh>
-        ))}
-
-        {/* gold bezel ring on the front face */}
-        <mesh position={[0, 0, 0.216]}>
-          <torusGeometry args={[0.62, 0.012, 12, 96]} />
-          <meshStandardMaterial color="#c6a15b" roughness={0.22} metalness={1} />
-        </mesh>
-      </Float>
+    <group position={fit.position} scale={fit.scale}>
+      <primitive object={scene} />
     </group>
   );
 }
 
-export default function ResinScene() {
+export default function ResinScene({ onReady }: { onReady?: () => void }) {
   return (
     <Canvas
       dpr={[1, 1.8]}
@@ -139,25 +152,26 @@ export default function ResinScene() {
       <Suspense fallback={null}>
         <GradientEnvironment />
 
-        <ambientLight intensity={0.55} />
+        <ambientLight intensity={0.75} />
         <spotLight
           position={[4, 6, 5]}
           angle={0.45}
           penumbra={1}
-          intensity={2.4}
+          intensity={3.0}
           color="#fdfbf6"
         />
-        <pointLight position={[-4, -2, -3]} intensity={1.0} color="#3b7459" />
-        <pointLight position={[0, 3, 4]} intensity={0.8} color="#e7d2a6" />
+        <pointLight position={[-4, -2, -3]} intensity={1.2} color="#3b7459" />
+        <pointLight position={[0, 3, 4]} intensity={1.0} color="#e7d2a6" />
 
-        <ResinBlock />
+        <ClockModel onReady={onReady} />
 
+        {/* Drag only — the baked turntable is the idle motion. Stacking
+            autoRotate on top of it spun the camera and the model against
+            each other. */}
         <OrbitControls
           makeDefault
           enableZoom={false}
           enablePan={false}
-          autoRotate
-          autoRotateSpeed={0.55}
           minPolarAngle={Math.PI / 3.2}
           maxPolarAngle={Math.PI / 1.75}
         />

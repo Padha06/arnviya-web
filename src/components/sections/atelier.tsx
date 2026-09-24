@@ -30,8 +30,8 @@ export function Atelier() {
             Every piece is poured <span className="italic text-gold-400">by hand, one at a time.</span>
           </h2>
           <p className="mt-5 max-w-[50ch] text-cream-100/60">
-            No two Arnviya pieces are identical, because no two flowers are. Turn the block to see
-            the botanicals and gold foil suspended inside the resin.
+            No two Arnviya pieces are identical, because no two flowers are. Watch a piece turn,
+            or drag to inspect the botanicals and gold foil suspended inside the resin.
           </p>
 
           <ul className="mt-9 space-y-3.5">

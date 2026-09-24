@@ -84,7 +84,7 @@ export const COLLECTIONS: Collection[] = [
     blurb:
       'Nameplate, resin pen and initial keychain boxed in your branding — the first thing a new hire opens.',
     image: '/images/flatlay-set.jpg',
-    meta: 'From \u20B91,950 / set \u00B7 MOQ 10',
+    meta: 'MOQ 10 · from \u20B91,950 / set at 500',
     span: 'md:col-span-3',
   },
   {
@@ -92,7 +92,7 @@ export const COLLECTIONS: Collection[] = [
     name: 'Doctor Appreciation',
     blurb: 'Desk clock, personalised nameplate and botanical pen for surgeons and medical teams.',
     image: '/images/clock-arch.jpg',
-    meta: 'From \u20B92,500 / set \u00B7 MOQ 5',
+    meta: 'MOQ 5 · from \u20B92,500 / set at 500',
     span: 'md:col-span-3',
   },
   {
@@ -101,7 +101,7 @@ export const COLLECTIONS: Collection[] = [
     blurb:
       'Framed resin art and a keepsake keychain carrying the family name and the possession date.',
     image: '/images/wallclock-white.jpg',
-    meta: 'From \u20B93,100 / set',
+    meta: 'MOQ 10 · from \u20B93,100 / set at 500',
     span: 'md:col-span-2',
   },
   {
@@ -109,7 +109,7 @@ export const COLLECTIONS: Collection[] = [
     name: 'Festival Hampers',
     blurb: 'Botanical pendant, keychain and a small clock, boxed for Diwali and New Year.',
     image: '/images/pendant-rose-heart.jpg',
-    meta: 'From \u20B92,250 / set',
+    meta: 'MOQ 25 · from \u20B92,250 / set at 500',
     span: 'md:col-span-2',
   },
   {
@@ -156,7 +156,7 @@ export const STEPS = [
 ];
 
 export const STATS = [
-  { value: 25, suffix: '', label: 'Pieces minimum order' },
+  { value: 5, suffix: '', label: 'Pieces minimum · kits' },
   { value: 500, suffix: '+', label: 'Best per-piece tier' },
   { value: 7, suffix: ' days', label: 'Express lead time' },
   { value: 100, suffix: '%', label: 'Hand-poured, no two alike' },
@@ -168,6 +168,7 @@ export type QuoteProduct = {
   sub: string;
   image: string;
   lead: number;
+  moq: number;
   tiers: Record<number, number>;
 };
 
@@ -180,6 +181,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Gold foil, dried botanicals \u00B7 MOQ 25',
     image: '/images/keychain-initial.jpg',
     lead: 8,
+    moq: 25,
     tiers: { 25: 240, 50: 205, 100: 175, 250: 150, 500: 130 },
   },
   {
@@ -188,6 +190,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Real pressed flowers \u00B7 MOQ 25',
     image: '/images/pendant-botanical.jpg',
     lead: 9,
+    moq: 25,
     tiers: { 25: 560, 50: 490, 100: 420, 250: 370, 500: 330 },
   },
   {
@@ -196,6 +199,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Silver bezel, dried rose petals \u00B7 MOQ 25',
     image: '/images/pendant-rose-heart.jpg',
     lead: 9,
+    moq: 25,
     tiers: { 25: 720, 50: 630, 100: 540, 250: 470, 500: 420 },
   },
   {
@@ -204,6 +208,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Botanical barrel, gold nib \u00B7 MOQ 25',
     image: '/images/pen.jpg',
     lead: 12,
+    moq: 25,
     tiers: { 25: 1250, 50: 1090, 100: 940, 250: 830, 500: 760 },
   },
   {
@@ -212,6 +217,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Hand-poured cover \u00B7 MOQ 25',
     image: '/images/diary.jpg',
     lead: 12,
+    moq: 25,
     tiers: { 25: 1050, 50: 920, 100: 790, 250: 700, 500: 640 },
   },
   {
@@ -220,6 +226,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Engraved name, title, logo \u00B7 MOQ 25',
     image: '/images/nameplate.jpg',
     lead: 10,
+    moq: 25,
     tiers: { 25: 1750, 50: 1520, 100: 1290, 250: 1140, 500: 1020 },
   },
   {
@@ -228,6 +235,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Hexagon / arch / round \u00B7 MOQ 25',
     image: '/images/clock-hex-sunflower.jpg',
     lead: 12,
+    moq: 25,
     tiers: { 25: 1600, 50: 1400, 100: 1190, 250: 1050, 500: 950 },
   },
   {
@@ -236,6 +244,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Nameplate + pen + keychain \u00B7 MOQ 10',
     image: '/images/flatlay-set.jpg',
     lead: 14,
+    moq: 10,
     tiers: { 25: 3400, 50: 2950, 100: 2500, 250: 2180, 500: 1950 },
   },
   {
@@ -244,6 +253,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Clock + nameplate + pen \u00B7 MOQ 5',
     image: '/images/clock-arch.jpg',
     lead: 14,
+    moq: 5,
     tiers: { 25: 4300, 50: 3750, 100: 3180, 250: 2790, 500: 2500 },
   },
   {
@@ -252,6 +262,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Wall art + keepsake keychain \u00B7 MOQ 10',
     image: '/images/wallclock-white.jpg',
     lead: 21,
+    moq: 10,
     tiers: { 25: 5400, 50: 4700, 100: 3980, 250: 3480, 500: 3100 },
   },
   {
@@ -260,6 +271,7 @@ export const QUOTE_PRODUCTS: QuoteProduct[] = [
     sub: 'Pendant + keychain + clock \u00B7 MOQ 25',
     image: '/images/pendant-geode.jpg',
     lead: 14,
+    moq: 25,
     tiers: { 25: 3900, 50: 3400, 100: 2880, 250: 2520, 500: 2250 },
   },
 ];

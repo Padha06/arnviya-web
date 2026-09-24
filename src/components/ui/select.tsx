@@ -19,7 +19,7 @@ const SelectTrigger = React.forwardRef<
       'bg-forest-900/70 px-4 py-3 text-left font-sans text-[0.9375rem] font-light text-cream-100',
       'transition-colors duration-300 hover:border-gold-500/40',
       'focus:border-gold-500/60 focus:outline-none focus:ring-2 focus:ring-gold-500/20',
-      'data-[placeholder]:text-cream-100/35 disabled:cursor-not-allowed disabled:opacity-50',
+      'data-[placeholder]:text-cream-100/50 disabled:cursor-not-allowed disabled:opacity-50',
       className,
     )}
     {...props}

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
+import { MotionProvider } from '@/components/motion-provider';
 import './globals.css';
 
 const display = Cormorant_Garamond({
@@ -50,7 +51,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable}`}>
-      <body className="grain">{children}</body>
+      <body className="grain">
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
+        <MotionProvider>{children}</MotionProvider>
+      </body>
     </html>
   );
 }

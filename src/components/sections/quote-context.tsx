@@ -57,7 +57,11 @@ export function QuoteProvider({ children }: { children: React.ReactNode }) {
   const [gst, setGst] = useState(true);
 
   const setQty = useCallback((id: string, qty: number) => {
-    setQuantities((prev) => ({ ...prev, [id]: Math.max(0, Math.min(5000, qty)) }));
+    const safe = Number.isFinite(qty) ? Math.trunc(qty) : 0;
+    const product = QUOTE_PRODUCTS.find((p) => p.id === id);
+    const moq = product?.moq ?? 25;
+    const next = safe <= 0 ? 0 : Math.max(moq, Math.min(5000, safe));
+    setQuantities((prev) => ({ ...prev, [id]: next }));
   }, []);
 
   const toggleAddon = useCallback((id: string, on: boolean) => {
@@ -78,7 +82,7 @@ export function QuoteProvider({ children }: { children: React.ReactNode }) {
     const addonRate = ADDONS.reduce((sum, a) => sum + (addons[a.id] ? a.rate : 0), 0);
 
     const lines: Line[] = QUOTE_PRODUCTS.filter((p) => (quantities[p.id] ?? 0) > 0).map((p) => {
-      const qty = Math.max(quantities[p.id] ?? 0, TIERS[0]);
+      const qty = Math.max(quantities[p.id] ?? 0, p.moq);
       const base = p.tiers[tierFor(qty)] + addonRate;
       const unit = express ? Math.round(base * 1.15) : base;
       return { id: p.id, name: p.name, qty, unit, line: unit * qty, lead: p.lead };
@@ -88,7 +92,7 @@ export function QuoteProvider({ children }: { children: React.ReactNode }) {
     const base25 = QUOTE_PRODUCTS.reduce((s, p) => {
       const q = quantities[p.id] ?? 0;
       if (q <= 0) return s;
-      const qty = Math.max(q, TIERS[0]);
+      const qty = Math.max(q, p.moq);
       return s + (p.tiers[25] + addonRate) * qty;
     }, 0);
 

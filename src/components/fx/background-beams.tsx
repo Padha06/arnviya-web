@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useId } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
  */
 export function BackgroundBeams({ className }: { className?: string }) {
   const uid = useId().replace(/:/g, '');
+  const reduce = useReducedMotion();
   const beams = Array.from({ length: 48 }, (_, i) => {
     const x = -900 + i * 52;
     const bend = 120 + (i % 5) * 34;
@@ -56,10 +57,15 @@ export function BackgroundBeams({ className }: { className?: string }) {
           </mask>
 
           <mask id={`sweep-mask-${uid}`} maskUnits="userSpaceOnUse">
+            {/* Same DOM under both preferences — only the motion changes. */}
             <motion.g
-              initial={{ x: -420 }}
-              animate={{ x: 1320 }}
-              transition={{ duration: 11, repeat: Infinity, ease: 'linear', repeatDelay: 3 }}
+              initial={reduce ? { x: 1320 } : { x: -420 }}
+              animate={reduce ? { x: 1320 } : { x: 1320 }}
+              transition={
+                reduce
+                  ? { duration: 0 }
+                  : { duration: 11, repeat: Infinity, ease: 'linear', repeatDelay: 3 }
+              }
             >
               <rect x="0" y="-220" width="260" height="1140" fill={`url(#sweep-${uid})`} />
             </motion.g>

@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <QuoteProvider>
       <Nav />
-      <main>
+      <main id="main">
         <Hero />
         <TrustStrip />
         <Bestsellers />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BlurFade } from '@/components/fx/blur-fade';
 import { Button, PillIcon } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowUpRight, Check, WhatsApp } from '@/components/icons';
+import { ArrowUpRight, Check } from '@/components/icons';
 import { inr } from '@/lib/utils';
 import { useQuote } from './quote-context';
 
@@ -26,10 +26,22 @@ const OCCASIONS = [
   'Milestone or award',
 ];
 
+const GSTIN_PATTERN = '[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]';
+const PHONE_PATTERN = '[\\+0-9][0-9\\+\\(\\)\\- ]{6,15}';
+
 export function FinalCta() {
   const { lines, total, totalQty, gst, summaryText } = useQuote();
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [gstin, setGstin] = useState('');
+  const deadlineRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const el = deadlineRef.current;
+    if (!el) return;
+    const d = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    el.min = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,7 +70,6 @@ export function FinalCta() {
       .filter(Boolean)
       .join('\n');
 
-    setError(null);
     setSent(true);
     window.location.href = `mailto:hello@arnviya.com?subject=${encodeURIComponent(
       `Corporate gifting quote — ${data.get('company') || 'your company'}`,
@@ -69,7 +80,7 @@ export function FinalCta() {
     <section
       id="contact"
       className="section container"
-      data-note="One form, one WhatsApp tap, one email address. The quote selection is carried straight into the brief, so no buyer is ever lost for want of a way to reach you."
+      data-note="One form and one email address. The quote selection is carried straight into the brief, so no buyer is ever lost for want of a way to reach you. The WhatsApp row appears here once the real number is supplied."
       data-note-impact="Captures every intent signal"
     >
       <div className="grid gap-16 [&>*]:min-w-0 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
@@ -87,33 +98,20 @@ export function FinalCta() {
 
           <div className="mt-10 space-y-4">
             <a
-              href="https://wa.me/910000000000"
-              className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors duration-500 hover:border-gold-500/40"
-            >
-              <WhatsApp className="h-6 w-6 shrink-0 text-gold-400" />
-              <span>
-                <span className="block text-sm text-cream-100">WhatsApp us</span>
-                <span className="block text-xs text-cream-100/45">
-                  Fastest reply — usually within the hour
-                </span>
-              </span>
-            </a>
-
-            <a
               href="mailto:hello@arnviya.com"
               className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors duration-500 hover:border-gold-500/40"
             >
               <ArrowUpRight className="h-6 w-6 shrink-0 text-gold-400" />
               <span>
                 <span className="block text-sm text-cream-100">hello@arnviya.com</span>
-                <span className="block text-xs text-cream-100/45">
+                <span className="block text-xs text-cream-100/60">
                   Attach your logo and we&rsquo;ll mock it up
                 </span>
               </span>
             </a>
           </div>
 
-          <ul className="mt-10 space-y-3 text-sm text-cream-100/55">
+          <ul className="mt-10 space-y-3 text-sm text-cream-100/60">
             {[
               'GST invoice, PO and Net-30 supported',
               'Breakage replaced free — photographed on arrival',
@@ -131,39 +129,55 @@ export function FinalCta() {
           <div className="bezel">
             <div className="bezel-core p-7 sm:p-9">
               <form onSubmit={handleSubmit} className="grid gap-5">
-                {lines.length > 0 ? (
-                  <div className="rounded-2xl border border-gold-500/25 bg-gold-500/[0.06] p-5">
-                    <p className="text-[0.625rem] uppercase tracking-[0.2em] text-gold-400">
-                      Attached from the quote builder
-                    </p>
-                    <div className="mt-3 space-y-1.5">
-                      {lines.map((l) => (
-                        <div
-                          key={l.id}
-                          className="flex justify-between gap-4 text-sm text-cream-100/80"
-                        >
-                          <span>
-                            {l.name} <span className="text-cream-100/40">× {l.qty}</span>
-                          </span>
-                          <span className="tabular-nums">{inr(l.line)}</span>
-                        </div>
-                      ))}
+                <div role="status" aria-live="polite">
+                  {lines.length > 0 ? (
+                    <div className="rounded-2xl border border-gold-500/25 bg-gold-500/[0.06] p-5">
+                      <p className="text-[0.625rem] uppercase tracking-[0.2em] text-gold-400">
+                        Attached from the quote builder
+                      </p>
+                      <div className="mt-3 space-y-1.5">
+                        {lines.map((l) => (
+                          <div
+                            key={l.id}
+                            className="flex justify-between gap-4 text-sm text-cream-100/80"
+                          >
+                            <span>
+                              {l.name} <span className="text-cream-100/55">× {l.qty}</span>
+                            </span>
+                            <span className="tabular-nums">{inr(l.line)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 flex justify-between border-t border-gold-500/20 pt-3 font-display text-xl text-cream-100">
+                        <span>Indicative total</span>
+                        <span className="tabular-nums">{inr(total)}</span>
+                      </div>
                     </div>
-                    <div className="mt-3 flex justify-between border-t border-gold-500/20 pt-3 font-display text-xl text-cream-100">
-                      <span>Indicative total</span>
-                      <span className="tabular-nums">{inr(total)}</span>
-                    </div>
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="company">Company</Label>
-                  <Input id="company" name="company" required placeholder="Your organisation" />
+                  <Input
+                    id="company"
+                    name="company"
+                    required
+                    maxLength={120}
+                    autoComplete="organization"
+                    placeholder="Your organisation"
+                  />
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="name">Your name</Label>
-                  <Input id="name" name="name" required placeholder="Full name" />
+                  <Input
+                    id="name"
+                    name="name"
+                    required
+                    maxLength={80}
+                    autoComplete="name"
+                    placeholder="Full name"
+                  />
                 </div>
 
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -174,12 +188,23 @@ export function FinalCta() {
                       name="email"
                       type="email"
                       required
+                      maxLength={120}
+                      autoComplete="email"
                       placeholder="name@company.com"
                     />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="phone">Phone / WhatsApp</Label>
-                    <Input id="phone" name="phone" placeholder="+91" />
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      maxLength={16}
+                      pattern={PHONE_PATTERN}
+                      placeholder="+91"
+                    />
                   </div>
                 </div>
 
@@ -201,13 +226,27 @@ export function FinalCta() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="deadline">Required by</Label>
-                    <Input id="deadline" name="deadline" type="date" />
+                    <Input id="deadline" name="deadline" type="date" ref={deadlineRef} />
                   </div>
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="gstin">GSTIN (optional — for the invoice)</Label>
-                  <Input id="gstin" name="gstin" placeholder="24XXXXXXXXXXXZX" />
+                  <Input
+                    id="gstin"
+                    name="gstin"
+                    value={gstin}
+                    onChange={(e) => setGstin(e.target.value.toUpperCase())}
+                    maxLength={15}
+                    pattern={GSTIN_PATTERN}
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    aria-describedby="gstin-hint"
+                    placeholder="24AABCU9603R1ZM"
+                  />
+                  <p id="gstin-hint" className="text-xs text-cream-100/55">
+                    15 characters — 2-digit state code, PAN, entity number, then Z and a checksum.
+                  </p>
                 </div>
 
                 <div className="grid gap-2">
@@ -215,11 +254,10 @@ export function FinalCta() {
                   <Textarea
                     id="notes"
                     name="notes"
+                    maxLength={800}
                     placeholder="Brand colours, logo file, delivery cities, budget ceiling…"
                   />
                 </div>
-
-                {error ? <p className="text-sm text-blush">{error}</p> : null}
 
                 <Button type="submit" className="justify-between">
                   Request my quote
@@ -229,12 +267,12 @@ export function FinalCta() {
                 </Button>
 
                 {sent ? (
-                  <p className="text-sm text-gold-400">
+                  <p className="text-sm text-gold-400" role="status">
                     Your email client is opening with the brief ready to send. If nothing happened,
                     write to hello@arnviya.com and paste the selection above.
                   </p>
                 ) : (
-                  <p className="text-xs leading-relaxed text-cream-100/40">
+                  <p className="text-xs leading-relaxed text-cream-100/60">
                     We reply within one working day. Your logo and details stay private.
                   </p>
                 )}

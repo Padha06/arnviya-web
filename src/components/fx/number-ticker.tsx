@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useInView, useMotionValue, useSpring } from 'framer-motion';
+import { useInView, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type NumberTickerProps = {
@@ -25,16 +25,29 @@ export function NumberTicker({
   const motionValue = useMotionValue(direction === 'down' ? value : 0);
   const springValue = useSpring(motionValue, { damping: 60, stiffness: 100 });
   const isInView = useInView(ref, { once: true, margin: '0px' });
+  const reduce = useReducedMotion();
+
+  const format = (n: number) =>
+    Intl.NumberFormat(locale, {
+      minimumFractionDigits: decimalPlaces,
+      maximumFractionDigits: decimalPlaces,
+    }).format(Number(n.toFixed(decimalPlaces)));
 
   useEffect(() => {
     if (!isInView) return;
+    if (reduce) {
+      if (ref.current) ref.current.textContent = format(value);
+      return;
+    }
     const t = setTimeout(() => {
       motionValue.set(direction === 'down' ? 0 : value);
     }, delay * 1000);
     return () => clearTimeout(t);
-  }, [motionValue, isInView, delay, value, direction]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [motionValue, isInView, delay, value, direction, reduce]);
 
   useEffect(() => {
+    if (reduce) return;
     const unsubscribe = springValue.on('change', (latest) => {
       if (ref.current) {
         ref.current.textContent = Intl.NumberFormat(locale, {
@@ -44,13 +57,12 @@ export function NumberTicker({
       }
     });
     return () => unsubscribe();
-  }, [springValue, decimalPlaces, locale]);
+  }, [springValue, decimalPlaces, locale, reduce]);
 
   return (
     <span
       ref={ref}
       className={cn('inline-block tabular-nums', className)}
-      // Seed the first paint so SSR / no-JS shows the final figure, not a blank.
       suppressHydrationWarning
     >
       {direction === 'down' ? value : 0}

@@ -162,17 +162,75 @@ html[data-notes='1'] [data-note] {
   }
 }
 
+/**
+ * Reduced motion: stop autonomous travel, keep color/opacity feedback.
+ * Framer components are covered by MotionConfig reducedMotion="user".
+ */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+
+  /* Decorative loops rest in place (static gold gradient, static strip). */
+  .animate-marquee,
+  .animate-marquee-vertical,
+  .animate-shimmer,
+  .animate-aurora,
+  .animate-beams-drift {
+    animation: none !important;
+  }
+
+  /* Spotlight lands on its end frame instead of flying in. */
+  .animate-spotlight {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: translate(-50%, -40%) scale(1) !important;
+  }
+
+  /* Feedback stays on colour/opacity; spatial properties do not tween. */
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-property: color, background-color, border-color, outline-color,
+      text-decoration-color, fill, stroke, opacity, box-shadow !important;
+    transition-duration: 120ms !important;
+    transition-timing-function: ease !important;
   }
+
+  /* Hover/active lift and zoom utilities off — colour change still reads. */
+  .group:hover .group-hover\:scale-\[1\.05\],
+  .group:hover .group-hover\/bento\:scale-\[1\.04\],
+  .group\/bento:hover .group-hover\/bento\:translate-x-1,
+  .group:hover .group-hover\:translate-x-0\.5,
+  .group:hover .group-hover\:-translate-y-0\.5,
+  .group:hover .group-hover\:scale-105,
+  .hover\:-translate-y-0\.5:hover,
+  .active\:scale-\[0\.98\]:active {
+    transform: none !important;
+  }
+}
+
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  background: #c6a15b;
+  color: #0f2118;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: top 0.25s ease;
+}
+.skip-link:focus-visible {
+  top: 1.25rem;
+  outline: 2px solid #f9f5ec;
+  outline-offset: 3px;
 }
 
 @media print {

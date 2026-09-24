@@ -90,7 +90,7 @@ export function Hero() {
                   <NumberTicker value={s.value} />
                   {s.suffix}
                 </div>
-                <div className="mt-2.5 text-[0.6875rem] uppercase leading-snug tracking-[0.16em] text-cream-100/45">
+                <div className="mt-2.5 text-[0.6875rem] uppercase leading-snug tracking-[0.16em] text-cream-100/50">
                   {s.label}
                 </div>
               </div>
